@@ -2,7 +2,7 @@
   "name": "server",
   "version": "0.0.1",
   "description": "",
-  "author": "",
+  "author": "Hanad Mohamed <hanaddaahir124@gmail.com>",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -87,5 +87,7 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  }
+  },
+  "main": "index.js",
+  "repository": "https://github.com/hanad124/voting_app-api.git"
 }

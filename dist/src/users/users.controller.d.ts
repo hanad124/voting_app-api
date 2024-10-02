@@ -9,10 +9,10 @@ export declare class UsersController {
             userId: string;
             name: string;
             email: string;
-            phone: string;
-            photoUrl: string;
+            phone: string | null;
+            photoUrl: string | null;
             semister: string;
-            description: string;
+            description: string | null;
             isWinner: boolean;
             voteCount: number;
             createdAt: Date;
@@ -30,10 +30,10 @@ export declare class UsersController {
             userId: string;
             name: string;
             email: string;
-            phone: string;
-            photoUrl: string;
+            phone: string | null;
+            photoUrl: string | null;
             semister: string;
-            description: string;
+            description: string | null;
             isWinner: boolean;
             voteCount: number;
             createdAt: Date;
