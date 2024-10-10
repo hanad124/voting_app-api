@@ -12,56 +12,122 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(cuid())
-  name     String
-  role     Role   @default(USER)
-  password String
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  password  String
+  roleId    String
+  deletedAt DateTime?
 
-  Competitor Competitor[]
-  Vote       Vote[]
+  role       Role        @relation(fields: [roleId], references: [id])
+  candidates Candidate[]
+  votes      Vote[]
+  auditLogs  AuditLog[]
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([email])
   @@map("users")
 }
 
-model Vote {
-  id String @id @default(cuid())
+model Role {
+  id   String   @id @default(cuid())
+  name RoleName @unique
 
-  userId       String @unique
-  competitorId String @unique
+  users User[]
 
-  user       User       @relation(fields: [userId], references: [id])
-  competitor Competitor @relation(fields: [competitorId], references: [id])
+  @@map("roles")
+}
+
+model Election {
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  status      ElectionStatus @default(PENDING)
+
+  candidates Candidate[]
+  votes      Vote[]
+  results    Result[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
+  @@map("elections")
+}
+
+model Candidate {
+  id         String    @id @default(cuid())
+  userId     String
+  electionId String
+  deletedAt  DateTime?
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  election Election @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  votes    Vote[]
+  results  Result[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("candidates")
+}
+
+model Vote {
+  id          String @id @default(cuid())
+  userId      String
+  candidateId String
+  electionId  String
+  weight      Float  @default(1.0)
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  election  Election  @relation(fields: [electionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@unique([userId, electionId])
   @@map("votes")
 }
 
-model Competitor {
-  id     String @id @default(cuid())
-  userId String @unique
+model Result {
+  id          String @id @default(cuid())
+  electionId  String
+  candidateId String
+  voteCount   Int
 
-  name        String
-  email       String
-  phone       String?
-  photoUrl    String?
-  semister    String  @default("6")
-  description String?
-  isWinner    Boolean @default(false)
-  voteCount   Int     @default(0)
-
-  user User @relation(fields: [userId], references: [id])
+  election  Election  @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
-  Votes     Vote[]
 
-  @@map("competitors")
+  @@map("results")
 }
 
-enum Role {
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  metadata  Json?
+  timestamp DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("audit_logs")
+}
+
+enum RoleName {
   USER
   ADMIN
-  COMPETITOR
+  CANDIDATE
+}
+
+enum ElectionStatus {
+  PENDING
+  ONGOING
+  COMPLETED
 }
